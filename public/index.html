@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>MoviePedia</title>
+  <link rel="stylesheet" href="./stylesheets/styles.css" />
+  <link rel="icon" href="./images/favicon.png" type="image/png">
+</head>
+
+<body>
+
+  <header>
+    <img class="icon" src="./images/favicon.png" alt="">
+    <h1>MoviePedia</h1>
+    <p class="subtitulo">Encontre aqui seu filme favorito!</p>
+  </header>
+
+  <main>
+    <div class="campo">
+      <label>Título:</label>
+      <input type="text" id="titulo" required />
+      <button type="button" id="btnBuscarOnline" style="background: #2c3440; font-size: 0.8rem;">Buscar Online</button>
+    </div>
+    <input type="hidden" id="capa" />
+    <section id="filtros">
+      <h2>Filtros</h2>
+      <div class="filtros-container">
+        <div class="grupo">
+          <label for="filtroTexto">Busca (título/direção):</label>
+          <input type="text" id="filtroTexto" placeholder="ex: nolan, senhor, etc" />
+          <button id="btnTexto">Filtrar</button>
+        </div>
+        <div class="grupo">
+          <label for="filtroAno">Ano:</label>
+          <input type="number" id="filtroAno" placeholder="ex: 2001" />
+          <button id="btnAno">Filtrar</button>
+        </div>
+
+        <div class="grupo">
+          <label for="filtroGenero">Gênero:</label>
+          <input type="text" id="filtroGenero" placeholder="ex: Drama" />
+          <button id="btnGenero">Filtrar</button>
+        </div>
+      </div>
+      <button id="btnLimpar">Limpar filtros</button>
+    </section>
+
+    <section id="conteudo">
+
+      <div id="col-esq">
+        <h2>Ultimas adições</h2>
+        <ul id="listaFilmes">
+        </ul>
+      </div>
+
+      <div id="col-dir">
+        <h2>Detalhes</h2>
+        <div id="detalhesFilme">
+        </div>
+      </div>
+
+    </section>
+
+    <section id="secForm">
+      <h2>Novo Filme</h2>
+
+      <form id="formFilme">
+        <div class="campo">
+          <label>Título:</label>
+          <input type="text" id="titulo" required />
+        </div>
+
+        <div class="campo">
+          <label>Ano:</label>
+          <input type="number" id="ano" required />
+        </div>
+
+        <div class="campo">
+          <label>Direção:</label>
+          <input type="text" id="direcao" required />
+        </div>
+
+        <div class="campo">
+          <label>Gêneros (separados por |):</label>
+          <input type="text" id="generos" placeholder="Sci-Fi|Drama" required />
+        </div>
+
+        <div class="campo">
+          <label>Nota:</label>
+          <input type="number" step="0.1" id="nota" placeholder="8.5" />
+        </div>
+
+        <div class="campo">
+          <label>Sinopse:</label>
+          <textarea id="sinopse" rows="3"></textarea>
+        </div>
+
+        <button type="submit">Adicionar</button>
+      </form>
+    </section>
+
+  </main>
+
+  <footer>
+    <div id="status">Status: aguardando…</div>
+  </footer>
+
+  <script src="javascripts/script.js"></script>
+</body>
+
+</html>

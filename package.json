@@ -1,0 +1,20 @@
+{
+  "name": "TF",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.6",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "http-errors": "~1.6.3",
+    "morgan": "^1.10.1",
+    "sqlite3": "^5.1.7",
+    "ws": "^8.18.3"
+  }
+}
