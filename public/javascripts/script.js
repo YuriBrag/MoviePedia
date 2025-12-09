@@ -5,6 +5,8 @@ function clearNode(node) {
   }
 }
 
+
+
 async function fetchJSON(url) {
   try {
     const response = await fetch(url);
@@ -163,51 +165,6 @@ function tratarMensagemWS(msg) {
   }
 }
 
-function configurarFormulario() {
-  const form = document.getElementById("formFilme");
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    setStatus("Enviando filme...");
-
-    const titulo = document.getElementById("titulo").value;
-    const ano = document.getElementById("ano").value;
-    const direcao = document.getElementById("direcao").value;
-    const generos = document.getElementById("generos").value;
-    const nota = document.getElementById("nota").value;
-    const sinopse = document.getElementById("sinopse").value;
-
-    const payload = {
-      titulo: titulo,
-      ano: parseInt(ano),
-      direcao: direcao,
-      generos: generos.split('|').map(s => s.trim()).filter(Boolean),
-      nota: nota ? parseFloat(nota) : null,
-      sinopse: sinopse
-    };
-
-    try {
-      const response = await fetch('/api/filmes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json();
-        throw new Error(errJson.error || "Erro ao salvar");
-      }
-
-      setStatus("Filme enviado. Aguardando atualização...");
-      form.reset();
-    } catch (e) {
-      setStatus("Erro: " + e.message);
-    }
-  });
-}
 async function buscarFilmeOnline() {
   const tituloInput = document.getElementById("titulo");
   
@@ -224,8 +181,7 @@ async function buscarFilmeOnline() {
     const dados = await fetchJSON(`/api/buscar-omdb?titulo=${encodeURIComponent(termo)}`);
 
     renderDetalhes(dados);
-
-    document.getElementById("formFilme").reset();
+    tituloInput.value = "";
 
     setStatus(`Filme "${dados.titulo}" encontrado e salvo no catálogo!`);
 
@@ -236,13 +192,43 @@ async function buscarFilmeOnline() {
     div.innerHTML = `<p style="color: #ff5555; padding: 10px;">${error.message}</p>`;
   }
 }
+async function verificarLogin() {
+  const userArea = document.getElementById('userArea');
+  if (!userArea) return;
 
+  try {
+    const response = await fetch('/api/auth/me');
+    const data = await response.json();
+
+    if (data.loggedIn) {
+      userArea.innerHTML = `
+        <span style="color: #99aabb; font-size: 0.8rem; margin-right: 5px;">
+          Olá, <strong style="color: #fff;">${data.user.nome}</strong>
+        </span>
+        <button id="btnSair" class="btn-sair">Sair</button>
+      `;
+
+      document.getElementById('btnSair').onclick = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.reload();
+      };
+
+    } else {
+      userArea.innerHTML = `
+        <a href="/login.html" class="btn-login">Sign In</a>
+        <a href="/cadastro.html" class="btn-create">Create Account</a>
+      `;
+    }
+
+  } catch (error) {
+    console.error("Erro ao verificar sessão:", error);
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   carregarLista("/api/filmes");
-
-  configurarFormulario();
   conectarWebSocket();
+  verificarLogin();
 
   document.getElementById("btnTexto").onclick = () => carregarLista(montarURLFilmes());
   document.getElementById("btnAno").onclick = () => carregarLista(montarURLFilmes());
@@ -254,4 +240,5 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filtroGenero").value = "";
     carregarLista("/api/filmes");
   };
+  document.getElementById("btnBuscarOnline").onclick = buscarFilmeOnline;
 });

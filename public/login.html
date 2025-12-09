@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - MoviePedia</title>
+  <link rel="stylesheet" href="./stylesheets/styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/png">
+</head>
+<body>
+
+  <header>
+    <a href="/" style="text-decoration: none; display: flex; align-items: center; color: white;">
+      <h1>MoviePedia</h1>
+    </a>
+  </header>
+
+  <main style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    
+    <section id="secForm" style="width: 100%; max-width: 400px;">
+      <h2 style="text-align: center; margin-bottom: 20px;">Login</h2>
+
+      <form id="formLogin" >
+        <div class="campo" style="margin-bottom: 20px;">
+          <label>Email:</label>
+          <input type="email" id="loginEmail" required placeholder="seu@email.com">
+        </div>
+
+        <div class="campo">
+          <label>Senha:</label>
+          <input type="password" id="loginSenha" required placeholder="******">
+        </div>
+
+        <button type="submit" style="width: 100%; margin-top: 10px;">Entrar</button>
+      </form>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
+        <p>Ainda não tem conta? <a href="/cadastro.html" style="color: #00e054;">Cadastre-se</a></p>
+      </div>
+      
+      <div id="authStatus" style="margin-top: 15px; text-align: center; color: #ff5555;"></div>
+    </section>
+
+  </main>
+
+  <script src="./javascripts/auth.js"></script>
+</body>
+</html>

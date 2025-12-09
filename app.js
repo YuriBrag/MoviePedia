@@ -1,13 +1,16 @@
 require('dotenv').config();
+const SESSION = process.env.SESSION_SECRET;
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api'); 
+var authRouter = require('./routes/auth');
 
 require('./modules/carrega_csv');
 
@@ -23,9 +26,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+  secret: SESSION, 
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24 
+  }
+}));
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/api', apiRouter); 
+app.use('/api', apiRouter);
+app.use('/api/auth', authRouter); 
+
 
 app.use(function(req, res, next) {
   next(createError(404));

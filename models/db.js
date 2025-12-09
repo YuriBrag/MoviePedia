@@ -4,6 +4,25 @@ const Database = require('better-sqlite3');
 const dbPath = path.join(__dirname, '../data', 'catalogo.db');
 const db = new Database(dbPath);
 const csvPath = path.join(__dirname, '../filmes.csv');
+
+db.exec(`
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  hash_senha TEXT NOT NULL
+);
+`);
+try {
+  const count = db.prepare('SELECT COUNT(*) as total FROM usuarios').get().total;
+  console.log(`[DB CHECK] O servidor encontrou ${count} usuarios ativos na tabela 'usuarios'.`);
+  if (count === 0) {
+    console.warn("AVISO: Nao ha usuarios ativos.");
+  }
+} catch (e) {
+  console.error("[DB CHECK] Erro ao verificar contagem:", e.message);
+}
+
 db.exec(`
 CREATE TABLE IF NOT EXISTS filmes (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,6 +46,22 @@ try {
   console.error("[DB CHECK] Erro ao verificar contagem:", e.message);
 }
 
+function buscarUsuarioPorEmail(email) {
+  const stmt = db.prepare('SELECT * FROM usuarios WHERE email = ?');
+  return stmt.get(email);
+}
+function buscarUsuarioPorId(id) {
+  const stmt = db.prepare('SELECT id, nome, email FROM usuarios WHERE id = ?');
+  return stmt.get(id);
+}
+function criarUsuario({ nome, email, hash_senha }) {
+  const stmt = db.prepare(`
+    INSERT INTO usuarios (nome, email, hash_senha)
+    VALUES (?, ?, ?)
+  `);
+  const info = stmt.run(nome, email, hash_senha);
+  return { id: info.lastInsertRowid, nome, email };
+}
 
 function generosToString(generos) {
   if (!generos) return '';
@@ -80,7 +115,7 @@ function obterFilmePorTitulo(tituloBusca) {
     WHERE titulo = ? COLLATE NOCASE
   `);
   const filme = stmt.get(tituloBusca.trim());
-  
+
   if (!filme) return null;
 
   return {
@@ -134,5 +169,8 @@ module.exports = {
   obterFilmePorId,
   inserirFilme,
   inserirLista,
-  obterFilmePorTitulo 
+  obterFilmePorTitulo, 
+  buscarUsuarioPorEmail,
+  buscarUsuarioPorId,
+  criarUsuario
 };

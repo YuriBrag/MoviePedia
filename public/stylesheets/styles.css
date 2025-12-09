@@ -228,6 +228,45 @@ footer {
   margin-top: 25px; 
 }
 
+#userArea {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-login, .btn-sair {
+  background-color: #445566;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 3px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.75rem; 
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-login:hover, .btn-sair:hover {
+  background-color: #556677;
+  color: #fff;
+}
+
+.btn-create {
+  color: #00e054;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-create:hover {
+  color: #ffffff;
+}
+
 /* ::-webkit-scrollbar {
   width: 8px;
 }
