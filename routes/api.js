@@ -81,6 +81,39 @@ router.post('/filmes', function (req, res, next) {
   }
 });
 
+router.post('/reviews', (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Você precisa estar logado para avaliar.' });
+  }
+
+  const { filmeId, nota, comentario } = req.body;
+  
+  if (!filmeId || !nota) {
+    return res.status(400).json({ error: 'Dados incompletos.' });
+  }
+
+  if (isNaN(notaFloat) || notaFloat < 0 || notaFloat > 10) {
+    return res.status(400).json({ error: 'A nota deve ser entre 0 e 10.' });
+  }
+
+  try {
+    db.criarReview(req.session.userId, filmeId, parseFloat(nota), comentario);
+    res.status(201).json({ message: 'Review adicionado!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao salvar review.' });
+  }
+});
+
+router.get('/reviews/:filmeId', (req, res) => {
+  try {
+    const reviews = db.listarReviewsDoFilme(req.params.filmeId);
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar reviews.' });
+  }
+});
+
 router.get('/buscar-omdb', async (req, res) => {
   const titulo = req.query.titulo;
   if (!titulo) return res.status(400).json({ error: 'Título necessário' });
