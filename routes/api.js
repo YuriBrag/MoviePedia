@@ -19,6 +19,8 @@ router.get('/filmes', function (req, res, next) {
   }
 });
 
+
+
 router.get('/filmes/:id', function (req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
@@ -81,6 +83,7 @@ router.post('/filmes', function (req, res, next) {
   }
 });
 
+/*
 router.post('/reviews', (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Você precisa estar logado para avaliar.' });
@@ -103,6 +106,33 @@ router.post('/reviews', (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Erro ao salvar review.' });
   }
+});
+*/
+
+router.post('/reviews', (req, res) => {
+    if (!req.session.usuario || !req.session.usuario.id) { 
+      return res.status(401).json({ error: 'Você precisa estar logado para avaliar.' });
+    }
+
+    const { filmeId, nota, comentario } = req.body;
+    
+    if (!filmeId || nota === undefined) {
+      return res.status(400).json({ error: 'Filme ID e nota são obrigatórios.' });
+    }
+
+    const notaFloat = parseFloat(nota);
+    
+    if (isNaN(notaFloat) || notaFloat < 0 || notaFloat > 10) { 
+      return res.status(400).json({ error: 'A nota deve ser entre 0 e 10.' });
+    }
+
+    try {
+      db.criarReview(req.session.usuario.id, filmeId, notaFloat, comentario);
+      res.status(201).json({ message: 'Review adicionado!' });  
+    } catch (err) {
+      console.error("Erro ao salvar review:", err);
+      res.status(500).json({ error: 'Erro ao salvar review.' });
+    }
 });
 
 router.get('/reviews/:filmeId', (req, res) => {
@@ -167,5 +197,40 @@ router.get('/buscar-omdb', async (req, res) => {
     res.status(500).json({ error: 'Erro interno no servidor' });
   }
 });
+
+
+// auxiliar de autenticacao 
+function ensureApiAuthenticated(req, res, next) {
+    if (req.session.usuario && req.session.usuario.id) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Você precisa estar logado para realizar esta ação.' });
+    }
+}
+
+
+router.delete('/reviews/:reviewId', ensureApiAuthenticated, (req, res) => {
+  const reviewId = parseInt(req.params.reviewId, 10);
+  const usuarioId = req.session.usuario.id;
+
+  if (Number.isNaN(reviewId)) {
+    return res.status(400).json({ error: 'ID da review inválido.' });
+  }
+
+  try {
+    const resultado = db.excluirReview(reviewId, usuarioId);
+
+    if (resultado.changes === 0) {
+      return res.status(404).json({ error: 'Review não encontrada ou você não tem permissão para excluí-la.' });
+    }
+
+    res.json({ message: 'Review excluída com sucesso.', reviewId: reviewId });
+
+  } catch (e) {
+    console.error("Erro ao excluir review:", e);
+    res.status(500).json({ error: 'Erro interno ao excluir review.' });
+  }
+});
+
 
 module.exports = router;

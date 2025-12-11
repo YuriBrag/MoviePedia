@@ -8,7 +8,8 @@ function clearNode(node) {
 
 async function fetchJSON(url) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: 'include' });
+    //const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Erro na requisição: ${response.status}`);
     }
@@ -192,6 +193,80 @@ async function buscarFilmeOnline() {
   }
 }
 
+
+async function abrirFormReview(filme) {
+  try {
+    const response = await fetch('/api/auth/me', { 
+      credentials: 'include' // <-- Adicionado para enviar o cookie de sessão
+      });
+      const authData = await response.json();
+      if (!authData.loggedIn) {
+        window.location.href = "/login.html";
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    const container = document.getElementById("detalhesFilme");
+    clearNode(container);
+    
+    container.appendChild(criarCabecalhoComVoltar(`Avaliar: ${filme.titulo}`, filme));
+    const formDiv = document.createElement("div");
+    formDiv.innerHTML = `
+      <div class="campo" style="margin-bottom: 25px;"> <label>Sua Nota (0 a 10):</label>
+        <input type="number" id="reviewNota" min="0" max="10" step="0.1" placeholder="Ex: 10" style="padding: 10px;">
+      </div>
+      
+      <div class="campo" style="margin-bottom: 25px;"> <label>Seu Comentário:</label>
+        <textarea id="reviewTexto" rows="5" placeholder="Escreva o que achou..." style="padding: 10px;"></textarea>
+      </div>
+      
+      <button id="btnEnviarReview" class="btn-action btn-avaliar" style="width: 100%;">ENVIAR AVALIAÇÃO</button>
+      <div id="msgReview" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+    `;
+    
+    container.appendChild(formDiv);
+    
+    document.getElementById("btnEnviarReview").onclick = async () => {
+      const btn = document.getElementById("btnEnviarReview");
+      const nota = document.getElementById("reviewNota").value;
+      const comentario = document.getElementById("reviewTexto").value;
+      
+      if (isNaN(nota) || nota < 0 || nota > 10) {
+        document.getElementById("msgReview").innerHTML = `<span style="color: #ff5555;">A nota deve ser entre 0 e 10!</span>`;
+        notaInput.style.border = "1px solid #ff5555"; 
+        return;
+      }
+      
+      btn.textContent = "Enviando...";
+      btn.disabled = true;
+      
+      try {
+        const resp = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filmeId: filme.id, nota, comentario }),
+          credentials: 'include' // cookie de sessao
+        });
+        
+        if (resp.ok) {
+          document.getElementById("msgReview").innerHTML = '<span style="color: #00e054;">Sucesso! Voltando...</span>';
+          setTimeout(() => renderDetalhes(filme), 1500);
+        } else {
+          const err = await resp.json();
+          document.getElementById("msgReview").innerHTML = `<span style="color: #ff5555;">${err.error}</span>`;
+          btn.textContent = "ENVIAR AVALIAÇÃO";
+          btn.disabled = false;
+        }
+      } catch (e) {
+        document.getElementById("msgReview").innerHTML = `<span style="color: #ff5555;">Erro de conexão.</span>`;
+        btn.textContent = "ENVIAR AVALIAÇÃO";
+        btn.disabled = false;
+      }
+    };
+}
+/* 
 async function abrirFormReview(filme) {
   try {
     const response = await fetch('/api/auth/me');
@@ -262,6 +337,7 @@ async function abrirFormReview(filme) {
     }
   };
 }
+*/
 
 async function carregarReviews(filme) {
   const container = document.getElementById("detalhesFilme");
@@ -383,6 +459,50 @@ async function verificarLogin() {
   try {
     const response = await fetch('/api/auth/me');
     const data = await response.json();
+
+    // adicionar hamburguer menu
+    if (data.loggedIn) {
+      userArea.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <button id="btnMenuPerfil" class="btn-menu-perfil" title="Meu Perfil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <span style="color: #99aabb; font-size: 0.8rem; margin-right: 5px; margin-left: 10px;">
+              Olá, <strong style="color: #fff;">${data.user.nome}</strong>
+          </span>
+          <button id="btnSair" class="btn-sair">Sair</button>
+        </div>
+            `;
+
+            
+      document.getElementById('btnMenuPerfil').onclick = () => {
+        window.location.href = '/users';
+      };
+      
+      document.getElementById('btnSair').onclick = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.reload();
+      };
+
+    } else {
+        userArea.innerHTML = `
+          <a href="/login.html" class="btn-login">Sign In</a>
+          <a href="/cadastro.html" class="btn-create">Create Account</a>
+        `;
+    }
+
+    } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+    }
+
+
+
+    /*
     if (data.loggedIn) {
       userArea.innerHTML = `
         <span style="color: #99aabb; font-size: 0.8rem; margin-right: 5px;">
@@ -391,10 +511,12 @@ async function verificarLogin() {
         <button id="btnSair" class="btn-sair">Sair</button>
       `;
 
+      
       document.getElementById('btnSair').onclick = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         window.location.reload();
       };
+
 
     } else {
       userArea.innerHTML = `
@@ -406,6 +528,7 @@ async function verificarLogin() {
   } catch (error) {
     console.error("Erro ao verificar sessão:", error);
   }
+    */
 }
 
 function renderSobre() {
