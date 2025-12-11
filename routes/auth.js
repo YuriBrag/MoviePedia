@@ -3,6 +3,15 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const db = require('../models/db');
 
+// auxiliar pra criar o obj da sessao
+function createSessionUser(usuario) {
+    return {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email
+    };
+}
+
 router.post('/register', (req, res) => {
   const { nome, email, senha } = req.body;
 
@@ -21,13 +30,22 @@ router.post('/register', (req, res) => {
 
     const novoUsuario = db.criarUsuario({ nome, email, hash_senha });
     
-    req.session.userId = novoUsuario.id;
+    //req.session.userId = novoUsuario.id;
+    req.session.usuario = createSessionUser(novoUsuario);
 
+    /*
     res.status(201).json({ message: 'Usuário criado!', user: { nome, email } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao cadastrar usuário.' });
   }
+    */
+   // Adicione um redirecionamento, pois é uma rota de API
+      res.status(201).json({ message: 'Usuário criado!', user: req.session.usuario });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao cadastrar usuário.' });
+    }
 });
 
 router.post('/login', (req, res) => {
@@ -48,6 +66,7 @@ router.post('/login', (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
+    /*
     req.session.userId = usuario.id;
 
     res.json({ message: 'Login realizado com sucesso!', user: { id: usuario.id, nome: usuario.nome } });
@@ -55,26 +74,31 @@ router.post('/login', (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Erro no servidor.' });
   }
+    */
+    req.session.usuario = createSessionUser(usuario); 
+
+    res.json({ message: 'Login realizado com sucesso!', user: req.session.usuario });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro no servidor.' });
+    }
+
 });
 
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(500).json({ error: 'Erro ao fazer logout' });
-    res.json({ message: 'Logout realizado.' });
-  });
+    req.session.destroy((err) => {
+        if (err) return res.status(500).json({ error: 'Erro ao fazer logout' });
+        // CORREÇÃO: Redireciona para a página inicial
+        res.json({ message: 'Logout realizado.' });
+    });
 });
 
 router.get('/me', (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ loggedIn: false });
-  }
+    if (!req.session.usuario || !req.session.usuario.id) { 
+        return res.status(401).json({ loggedIn: false });
+    }
 
-  const usuario = db.buscarUsuarioPorId(req.session.userId);
-  if (!usuario) {
-    return res.status(401).json({ loggedIn: false });
-  }
-
-  res.json({ loggedIn: true, user: usuario });
+    res.json({ loggedIn: true, user: req.session.usuario });
 });
 
 module.exports = router;

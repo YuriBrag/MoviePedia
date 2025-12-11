@@ -12,7 +12,7 @@ var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api'); 
 var authRouter = require('./routes/auth');
 
-require('./modules/carrega_csv');
+//require('./modules/carrega_csv');
 
 
 var app = express();

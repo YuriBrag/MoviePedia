@@ -99,6 +99,55 @@ function listarReviewsDoFilme(filmeId) {
   return stmt.all(filmeId);
 }
 
+// funçoes para area do usuario 
+function atualizarUsuario({ id, nome, email, hash_senha }) {
+    let fields = [];
+    let params = [];
+    if (nome) {
+        fields.push('nome = ?');
+        params.push(nome);
+    }
+    if (email) {
+        fields.push('email = ?');
+        params.push(email);
+    }
+    if (hash_senha) {
+        fields.push('hash_senha = ?');
+        params.push(hash_senha);
+    }
+
+    if (fields.length === 0) return { changes: 0 };
+
+    params.push(id);
+    const stmt = db.prepare(`
+        UPDATE usuarios
+        SET ${fields.join(', ')}
+        WHERE id = ?
+    `);
+    const info = stmt.run(...params);
+    return info;
+}
+
+function excluirUsuario(id) {
+    // 1. Excluir reviews do usuário
+    db.prepare('DELETE FROM reviews WHERE usuario_id = ?').run(id);
+
+    // 2. Excluir o próprio usuário
+    const info = db.prepare('DELETE FROM usuarios WHERE id = ?').run(id);
+    return info;
+}
+
+function listarReviewsDoUsuario(usuarioId) {
+    const stmt = db.prepare(`
+        SELECT r.*, f.titulo as titulo_filme 
+        FROM reviews r
+        JOIN filmes f ON r.filme_id = f.id
+        WHERE r.usuario_id = ?
+        ORDER BY r.data DESC
+    `);
+    return stmt.all(usuarioId);
+}
+
 
 function buscarUsuarioPorEmail(email) {
   const stmt = db.prepare('SELECT * FROM usuarios WHERE email = ?');
@@ -202,6 +251,24 @@ function inserirFilme({ titulo, ano, direcao, generos, nota, sinopse, capa }) {
   };
 }
 
+function excluirReview(reviewId, usuarioId) {
+  const reviewParaExcluir = db.prepare('SELECT filme_id FROM reviews WHERE id = ? AND usuario_id = ?').get(reviewId, usuarioId);
+
+  if (!reviewParaExcluir) {
+    return { changes: 0 };
+  }
+  
+  const filmeId = reviewParaExcluir.filme_id;
+
+  const info = db.prepare('DELETE FROM reviews WHERE id = ? AND usuario_id = ?').run(reviewId, usuarioId);
+    
+  if (info.changes > 0) {
+    atualizarMediaFilme(filmeId);
+  }
+
+  return info;
+}
+
 const inserirLista = db.transaction((lista) => {
   const result = [];
   for (const item of lista) {
@@ -219,6 +286,10 @@ module.exports = {
   buscarUsuarioPorEmail,
   buscarUsuarioPorId,
   criarUsuario,
+  atualizarUsuario, // area do usu
+  excluirUsuario, // area do usu
+  listarReviewsDoUsuario, // area do usu
   criarReview,
+  excluirReview,
   listarReviewsDoFilme
 };
