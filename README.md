@@ -35,9 +35,10 @@ O **MoviePedia** é um sistema de catalogação de filmes e séries que integra 
 - **Autenticação:** `bcryptjs` (hash de senha) e `express-session`
 
 ## Como Rodar o Projeto
-
 ### Pré-requisitos
 - Node.js (v18 ou superior)
+- Express
+- SQLite
 - NPM
 
 ### 1. Instalação
@@ -47,3 +48,23 @@ Clone o repositório e instale as dependências:
 git clone [https://github.com/YuriBrag/MoviePedia.git](https://github.com/YuriBrag/MoviePedia.git)
 cd MoviePedia
 npm install
+```
+
+### 2. Crie o arquivo .env, contendo:
+```bash
+OMDB_API_KEY=sua_chave_aqui
+PORT=3000
+SESSION_SECRET=minha_frase_secreta_segura
+```
+*Obs:* Como obter a chave da API (OMDB_API_KEY): Acesse http://www.omdbapi.com/apikey.aspx, selecione a opção "FREE", digite seu e-mail e clique em Submit. Você receberá a chave no seu e-mail, clique no link para ativa-la.
+
+### 3. Crie/Popule o banco de dados:
+```bash
+node seed.js
+node seed-reviews.js
+```
+
+### 4. Inicie o client/server:
+```bash
+npm start
+```
