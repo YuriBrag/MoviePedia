@@ -12,9 +12,6 @@ var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api'); 
 var authRouter = require('./routes/auth');
 
-//require('./modules/carrega_csv');
-
-
 var app = express();
 
 app.set('views', path.join(__dirname, 'views'));

@@ -9,7 +9,6 @@ function clearNode(node) {
 async function fetchJSON(url) {
   try {
     const response = await fetch(url, { credentials: 'include' });
-    //const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Erro na requisição: ${response.status}`);
     }
@@ -197,7 +196,7 @@ async function buscarFilmeOnline() {
 async function abrirFormReview(filme) {
   try {
     const response = await fetch('/api/auth/me', { 
-      credentials: 'include' // <-- Adicionado para enviar o cookie de sessão
+      credentials: 'include' 
       });
       const authData = await response.json();
       if (!authData.loggedIn) {

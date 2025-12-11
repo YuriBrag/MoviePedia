@@ -366,14 +366,13 @@ footer {
   font-size: 1rem;
 }
 
-/* NAVBAR  */
 
 .topbar {
   width: 100%;
   height: 70px;
   padding: 0 30px;
-  background: rgba(15, 15, 15, 0.85); /* escuro com transparência */
-  backdrop-filter: blur(8px);          /* efeito glass */
+  background: rgba(15, 15, 15, 0.85); 
+  backdrop-filter: blur(8px);          
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -423,8 +422,6 @@ footer {
   background-color: #00a95b;
 }
 
-
-/* ===== USER AREA ===== */
 .topbar .right {
   color: #fff;
   font-size: 1rem;
@@ -464,12 +461,7 @@ footer {
   }
 }
 
-
-
-
 /* area do usuario */
-
-
 
 .perfil-page {
   display: flex;
@@ -579,7 +571,6 @@ footer {
   background-color: #00c045;
 }
 
-/* historico */
 .review-item {
   background-color: #1b222a;
   border: 1px solid #2c3440;

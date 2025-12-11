@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title><%= title %> | MoviePedia</title>
+    <title>
+        <%= title %> | MoviePedia
+    </title>
     <link rel='stylesheet' href='/stylesheets/styles.css' />
 </head>
 
 <body class="perfil-page">
 
     <div class="sidebar">
+        <a href="/"
+            style="display: block; margin-bottom: 20px; color: #00e054; text-decoration: none; font-weight: bold; font-size: 0.9rem;">
+            &larr; Voltar ao menu principal
+        </a>
+
         <h2>Área do Usuário</h2>
         <a href="/users" class="<%= abaAtiva === 'perfil' ? 'active' : '' %>">
             <i class="fa fa-user"></i> Editar Perfil
@@ -16,7 +24,8 @@
             <i class="fa fa-comment"></i> Histórico de Avaliações
         </a>
         <hr>
-        <form action="/users/excluir" method="POST" onsubmit="return confirm('ATENÇÃO: Deseja realmente excluir sua conta? Esta ação é irreversível!');">
+        <form action="/users/excluir" method="POST"
+            onsubmit="return confirm('ATENÇÃO: Deseja realmente excluir sua conta? Esta ação é irreversível!');">
             <button type="submit" style="color: red; background: none; border: none; cursor: pointer; padding: 10px;">
                 Excluir Conta
             </button>
@@ -25,106 +34,117 @@
 
     <div class="content">
         <% if (locals.erro) { %>
-            <p class="error">ERRO: <%= erro %></p>
-        <% } %>
+            <p class="error">ERRO: <%= erro %>
+            </p>
+            <% } %>
 
-        <% if (abaAtiva === 'perfil') { %>
-            
-            <h1>Editar Perfil de <%= usuario.nome %></h1>
+                <% if (abaAtiva==='perfil' ) { %>
 
-            <form action="/users/editar" method="POST">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" value="<%= usuario.nome %>" required><br><br>
+                    <h1>Editar Perfil de <%= usuario.nome %>
+                    </h1>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="<%= usuario.email %>" required><br><br>
+                    <form action="/users/editar" method="POST">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" name="nome" value="<%= usuario.nome %>" required><br><br>
 
-                <h2>Alterar Senha</h2>
-                <p>Deixe em branco se não quiser alterar.</p>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" value="<%= usuario.email %>" required><br><br>
 
-                <label for="senha_antiga">Senha Atual:</label>
-                <input type="password" id="senha_antiga" name="senha_antiga"><br><br>
+                        <h2>Alterar Senha</h2>
+                        <p>Deixe em branco se não quiser alterar.</p>
 
-                <label for="nova_senha">Nova Senha:</label>
-                <input type="password" id="nova_senha" name="nova_senha"><br><br>
-                
-                <button type="submit">Salvar Alterações</button>
-            </form>
-        <% } else if (abaAtiva === 'historico') { %>
+                        <label for="senha_antiga">Senha Atual:</label>
+                        <input type="password" id="senha_antiga" name="senha_antiga"><br><br>
 
-            <h1>Histórico de Avaliações</h1>
-            <div id="historico-reviews">
-                <% if (reviews.length > 0) { %>
-                    <% reviews.forEach(review => { %>
-                        <div class="review-item" id="review-<%= review.id %>">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <p><strong>Filme:</strong> <%= review.titulo_filme %></p>
-                                <button class="btn-excluir-review" data-review-id="<%= review.id %>">
-                                    Apagar
-                                </button>
-                            </div>
-                            <p><strong>Nota:</strong> <%= review.nota %>/10</p>
-                            <p><strong>Comentário:</strong> <%= review.comentario %></p>
-                            <p><small>Em: <%= new Date(review.data).toLocaleDateString() %></small></p>
+                        <label for="nova_senha">Nova Senha:</label>
+                        <input type="password" id="nova_senha" name="nova_senha"><br><br>
+
+                        <button type="submit">Salvar Alterações</button>
+                    </form>
+                    <% } else if (abaAtiva==='historico' ) { %>
+
+                        <h1>Histórico de Avaliações</h1>
+                        <div id="historico-reviews">
+                            <% if (reviews.length> 0) { %>
+                                <% reviews.forEach(review=> { %>
+                                    <div class="review-item" id="review-<%= review.id %>">
+                                        <div
+                                            style="display: flex; justify-content: space-between; align-items: center;">
+                                            <p><strong>Filme:</strong>
+                                                <%= review.titulo_filme %>
+                                            </p>
+                                            <button class="btn-excluir-review" data-review-id="<%= review.id %>">
+                                                Apagar
+                                            </button>
+                                        </div>
+                                        <p><strong>Nota:</strong>
+                                            <%= review.nota %>/10
+                                        </p>
+                                        <p><strong>Comentário:</strong>
+                                            <%= review.comentario %>
+                                        </p>
+                                        <p><small>Em: <%= new Date(review.data).toLocaleDateString() %></small></p>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p>Você ainda não fez nenhuma avaliação.</p>
+                                            <% } %>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <p>Você ainda não fez nenhuma avaliação.</p>
-                <% } %>
-    </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.btn-excluir-review').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const reviewId = e.target.dataset.reviewId;
-                    
-                    if (!confirm(`Tem certeza que deseja apagar o comentário (ID: ${reviewId})?`)) {
-                        return;
-                    }
-                    
-                    try {
-                        const response = await fetch(`/api/reviews/${reviewId}`, {
-                            method: 'DELETE',
-                            credentials: 'include'
-                        });
-                        
-                        if (response.ok) {
-                            const item = document.getElementById(`review-${reviewId}`);
-                            if (item) {
-                                item.style.opacity = '0.5';
-                                item.innerHTML = '<p style="color: #ff5555; text-align: center;">Comentário excluído.</p>';
-                                setTimeout(() => item.remove(), 1000);
-                            }
-                        } else {
-                            const errorData = await response.json();
-                            alert('Erro ao excluir: ' + (errorData.error || 'Erro desconhecido.'));
-                        }
-                    } catch (error) {
-                        alert('Erro de conexão com o servidor.');
-                    }
-                });
-            });
-        });
-    </script>
-    <style>
-        .btn-excluir-review {
-            background-color: #ff5555;
-            color: #14181c;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            font-size: 0.8rem;
-        }
-        .btn-excluir-review:hover {
-            opacity: 0.8;
-        }
-    </style>
 
-<% } %>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                document.querySelectorAll('.btn-excluir-review').forEach(button => {
+                                    button.addEventListener('click', async (e) => {
+                                        const reviewId = e.target.dataset.reviewId;
+
+                                        if (!confirm(`Tem certeza que deseja apagar o comentário (ID: ${reviewId})?`)) {
+                                            return;
+                                        }
+
+                                        try {
+                                            const response = await fetch(`/api/reviews/${reviewId}`, {
+                                                method: 'DELETE',
+                                                credentials: 'include'
+                                            });
+
+                                            if (response.ok) {
+                                                const item = document.getElementById(`review-${reviewId}`);
+                                                if (item) {
+                                                    item.style.opacity = '0.5';
+                                                    item.innerHTML = '<p style="color: #ff5555; text-align: center;">Comentário excluído.</p>';
+                                                    setTimeout(() => item.remove(), 1000);
+                                                }
+                                            } else {
+                                                const errorData = await response.json();
+                                                alert('Erro ao excluir: ' + (errorData.error || 'Erro desconhecido.'));
+                                            }
+                                        } catch (error) {
+                                            alert('Erro de conexão com o servidor.');
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+                        <style>
+                            .btn-excluir-review {
+                                background-color: #ff5555;
+                                color: #14181c;
+                                font-weight: bold;
+                                padding: 5px 10px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                transition: opacity 0.2s;
+                                font-size: 0.8rem;
+                            }
+
+                            .btn-excluir-review:hover {
+                                opacity: 0.8;
+                            }
+                        </style>
+
+                        <% } %>
     </div>
 
 </body>
+
 </html>
